@@ -87,7 +87,7 @@ function stopSound() {
 }
 
 // Ajouter un événement de survol pour jouer le son
-buttonsContainer.addEventListener('mouseover', playSound);
+buttonsContainer.addEventListener('mouseenter', playSound);
 
 // Ajouter un événement de sortie de survol pour arrêter le son
 buttonsContainer.addEventListener('mouseout', stopSound);
