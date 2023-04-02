@@ -50,7 +50,7 @@ const frequency = 1000; // Fréquence en Hz
 const type = 'triangle'; // Forme d'onde
 
 // Créer un nœud de génération de son
-const oscillator = audioCtx.createOscillator();
+let oscillator = audioCtx.createOscillator();
 oscillator.type = type;
 oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
 
@@ -66,12 +66,24 @@ envelope.connect(audioCtx.destination);
 
 // Fonction pour jouer le son
 function playSound() {
+    if (oscillator.started) {
+      stopSound();
+    }
+    oscillator = audioCtx.createOscillator();
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+    oscillator.connect(envelope);
+    envelope.connect(audioCtx.destination);
+    oscillator.started = true;
     oscillator.start();
 }
 
 // Fonction pour arrêter le son
 function stopSound() {
-    oscillator.stop();
+    if (oscillator.started) {
+      oscillator.stop();
+      oscillator.started = false;
+    }
 }
 
 // Ajouter un événement de survol pour jouer le son
@@ -82,3 +94,31 @@ buttonsContainer.addEventListener('mouseout', stopSound);
 
 // Ajouter un événement de clic pour jouer le son au clic d'un bouton
 buttonsContainer.addEventListener('mousedown', playSound);
+// Créer les crédits
+const creditsElement = document.createElement('div');
+creditsElement.classList.add('credits');
+creditsElement.innerHTML = `
+  <h2>Crédits</h2>
+  <ul>
+    <li>Développeur : Riozacki</li>
+    <li>Graphiste : A. Tist</li>
+    <li>Scénariste : J. K. Rowling</li>
+  </ul>
+  <button class="close-button">Fermer</button>
+`;
+
+// Fonction pour afficher ou cacher les crédits
+function toggleCredits() {
+  const creditsElement = document.getElementById('credits');
+  creditsElement.classList.toggle('hidden');
+}
+
+// Ajouter un événement de clic pour afficher/cacher les crédits
+creditsButton.addEventListener('click', toggleCredits);
+
+// Ajouter les crédits à l'écran du jeu
+gameScreen.appendChild(creditsElement);
+
+// Créer un événement de clic pour fermer les crédits
+const closeButton = creditsElement.querySelector('.close-button');
+closeButton.addEventListener('click', toggleCredits);
