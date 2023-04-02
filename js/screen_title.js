@@ -42,32 +42,88 @@ buttonsContainer.appendChild(onlineButton);
 buttonsContainer.appendChild(optionsButton);
 buttonsContainer.appendChild(creditsButton);
 
-// Ajouter un gestionnaire d'événements pour le bouton "1 player"
-singlePlayerButton.addEventListener('click', () => {
-console.log('1 player selected');
-// Lancer le mode "1 joueur"
-});
+// Créer un contexte audio
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-// Ajouter un gestionnaire d'événements pour le bouton "2 players"
-twoPlayersButton.addEventListener('click', () => {
-console.log('2 players selected');
-// Lancer le mode "2 joueurs"
-});
+// Définir les paramètres du son
+const frequency = 1000; // Fréquence en Hz
+const type = 'triangle'; // Forme d'onde
 
-// Ajouter un gestionnaire d'événements pour le bouton "Online"
-onlineButton.addEventListener('click', () => {
-console.log('Online selected');
-// Lancer le mode "En ligne"
-});
+// Créer un nœud de génération de son
+let oscillator = audioCtx.createOscillator();
+oscillator.type = type;
+oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
 
-// Ajouter un gestionnaire d'événements pour le bouton "Options"
-optionsButton.addEventListener('click', () => {
-console.log('Options selected');
-// Afficher les options
-});
+// Créer un nœud d'enveloppe
+const envelope = audioCtx.createGain();
+envelope.gain.setValueAtTime(0, audioCtx.currentTime);
+envelope.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 0.02);
+envelope.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
 
-// Ajouter un gestionnaire d'événements pour le bouton "Credits"
-creditsButton.addEventListener('click', () => {
-console.log('Credits selected');
-// Afficher les crédits
-});
+// Connecter les nœuds audio
+oscillator.connect(envelope);
+envelope.connect(audioCtx.destination);
+
+// Fonction pour jouer le son
+function playSound() {
+    if (!oscillator.started) {
+      oscillator = audioCtx.createOscillator();
+      oscillator.type = type;
+      oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+  
+      // Connecter les nœuds audio
+      oscillator.connect(envelope);
+      envelope.connect(audioCtx.destination);
+  
+      oscillator.started = true;
+      oscillator.start();
+    }
+  }
+  
+
+// Fonction pour arrêter le son
+function stopSound() {
+    if (oscillator.started) {
+      oscillator.stop();
+      oscillator.started = false;
+    }
+}
+
+// Ajouter un événement de survol pour jouer le son
+buttonsContainer.addEventListener('mouseenter', playSound);
+
+// Ajouter un événement de sortie de survol pour arrêter le son
+buttonsContainer.addEventListener('mouseout', stopSound);
+
+// Ajouter un événement de clic pour jouer le son au clic d'un bouton
+buttonsContainer.addEventListener('mousedown', playSound);
+// Créer les crédits
+
+
+const creditsElement = document.createElement('div');
+creditsElement.classList.add('credits');
+creditsElement.innerHTML = `
+  <h2>Crédits</h2>
+  <ul>
+    <li>Développeur : Riozacki</li>
+    <li>Graphiste : A. Tist</li>
+    <li>Scénariste : J. K. Rowling</li>
+  </ul>
+  <button class="close-button">Fermer</button>
+`;
+
+// Fonction pour afficher ou cacher les crédits
+function toggleCredits() {
+  const creditsElement = document.getElementById('credits');
+  creditsElement.classList.toggle('hidden');
+}
+
+// Ajouter un événement de clic pour afficher/cacher les crédits
+creditsButton.addEventListener('click', toggleCredits);
+
+// Ajouter les crédits à l'écran du jeu
+gameScreen.appendChild(creditsElement);
+
+// Créer un événement de clic pour fermer les crédits
+const closeButton = creditsElement.querySelector('.close-button');
+closeButton.addEventListener('click', toggleCredits);
